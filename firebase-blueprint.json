@@ -1,0 +1,60 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Profil pengguna dengan informasi saldo keuangan",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "ID unik pengguna dari Firebase Auth" },
+        "name": { "type": "string", "description": "Nama lengkap pengguna" },
+        "email": { "type": "string", "description": "Alamat email pengguna" },
+        "balance": { "type": "number", "description": "Total saldo saat ini dalam Rupiah" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Waktu pembuatan profil" }
+      },
+      "required": ["uid", "name", "email", "balance"]
+    },
+    "Transaction": {
+      "title": "Transaction",
+      "description": "Entri transaksi keuangan (pemasukan atau pengeluaran)",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "ID unik transaksi" },
+        "userId": { "type": "string", "description": "ID pengguna yang membuat transaksi" },
+        "type": { "type": "string", "enum": ["pemasukan", "pengeluaran"], "description": "Tipe transaksi" },
+        "nominal": { "type": "number", "description": "Jumlah uang dalam Rupiah" },
+        "category": { "type": "string", "description": "Kategori transaksi (e.g., Makanan, Transport, Belanja)" },
+        "date": { "type": "string", "description": "Tanggal transaksi format YYYY-MM-DD" },
+        "note": { "type": "string", "description": "Catatan tambahan transaksi" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Waktu entri transaksi dibuat" }
+      },
+      "required": ["id", "userId", "type", "nominal", "category", "date"]
+    },
+    "Budget": {
+      "title": "Budget",
+      "description": "Batas anggaran bulanan untuk kategori tertentu",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "ID anggaran" },
+        "userId": { "type": "string", "description": "ID pengguna" },
+        "category": { "type": "string", "description": "Kategori yang dianggarkan" },
+        "limit": { "type": "number", "description": "Batas maksimum pengeluaran dalam Rupiah" },
+        "month": { "type": "string", "description": "Bulan anggaran format YYYY-MM" }
+      },
+      "required": ["id", "userId", "category", "limit", "month"]
+    }
+  },
+  "firestore": {
+    "/users/{uid}": {
+      "schema": "User",
+      "description": "Menyimpan profil pengguna berdasarkan UID Auth."
+    },
+    "/transactions/{transactionId}": {
+      "schema": "Transaction",
+      "description": "Menyimpan transaksi keuangan pengguna."
+    },
+    "/budgets/{budgetId}": {
+      "schema": "Budget",
+      "description": "Menyimpan batas anggaran bulanan per kategori."
+    }
+  }
+}

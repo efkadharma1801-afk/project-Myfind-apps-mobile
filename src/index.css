@@ -1,0 +1,45 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --color-primary: #4648d4;
+  --color-primary-container: #6063ee;
+  --color-secondary: #0058be;
+  --color-secondary-container: #2170e4;
+  --color-tertiary: #006c49;
+  --color-tertiary-container: #00885d;
+}
+
+/* Glassmorphic card styling */
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #4648d4 0%, #2170e4 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.bg-brand-gradient {
+  background: linear-gradient(135deg, #4648d4 0%, #2170e4 100%);
+}
+
+.bg-brand-soft-gradient {
+  background: linear-gradient(135deg, rgba(70, 72, 212, 0.08) 0%, rgba(33, 112, 228, 0.08) 100%);
+}
+
+/* Scrollbar hiding */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+

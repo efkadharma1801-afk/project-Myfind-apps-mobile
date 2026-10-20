@@ -1,0 +1,90 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global safety net: default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper global functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+    
+    function isValidUser(data) {
+      return data.uid is string && data.uid.size() <= 128 &&
+             data.name is string && data.name.size() <= 100 &&
+             data.email is string && data.email.size() <= 100 &&
+             data.balance is number &&
+             data.createdAt is string && data.createdAt.size() <= 100;
+    }
+
+    function isValidTransaction(data) {
+      return data.id is string && data.id.size() <= 128 &&
+             data.userId is string && data.userId.size() <= 128 &&
+             data.type is string && (data.type == 'pemasukan' || data.type == 'pengeluaran') &&
+             data.nominal is number && data.nominal >= 0 &&
+             data.category is string && data.category.size() <= 100 &&
+             data.date is string && data.date.size() <= 50 &&
+             (!('note' in data) || (data.note is string && data.note.size() <= 500)) &&
+             (!('createdAt' in data) || (data.createdAt is string && data.createdAt.size() <= 100));
+    }
+
+    function isValidBudget(data) {
+      return data.id is string && data.id.size() <= 128 &&
+             data.userId is string && data.userId.size() <= 128 &&
+             data.category is string && data.category.size() <= 100 &&
+             data.limit is number && data.limit >= 0 &&
+             data.month is string && data.month.size() <= 50;
+    }
+
+    // Aturan untuk profil pengguna
+    match /users/{uid} {
+      // Allows all signed-in users to list/get user profiles because the application 
+      // displays a "Registered Users List" inside the Profile page.
+      allow read: if isOwner(uid);
+      allow create: if isOwner(uid) && isValidUser(request.resource.data) &&
+                    request.resource.data.uid == uid;
+      allow update: if isOwner(uid) && isValidUser(request.resource.data) &&
+                    request.resource.data.uid == uid &&
+                    request.resource.data.createdAt == resource.data.createdAt &&
+                    (
+                      // Action 1: update profile name
+                      request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name']) ||
+                      // Action 2: update balance (e.g. from transaction write batches)
+                      request.resource.data.diff(resource.data).affectedKeys().hasOnly(['balance'])
+                    );
+    }
+    
+    // Aturan untuk transaksi keuangan
+    match /transactions/{transactionId} {
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && request.auth.uid == request.resource.data.userId &&
+                    request.resource.data.id == transactionId &&
+                    isValidTransaction(request.resource.data);
+      allow update: if isSignedIn() && resource.data.userId == request.auth.uid &&
+                    request.resource.data.userId == request.auth.uid &&
+                    request.resource.data.id == transactionId &&
+                    isValidTransaction(request.resource.data);
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+    
+    // Aturan untuk anggaran (budgets)
+    match /budgets/{budgetId} {
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && request.auth.uid == request.resource.data.userId &&
+                    request.resource.data.id == budgetId &&
+                    isValidBudget(request.resource.data);
+      allow update: if isSignedIn() && resource.data.userId == request.auth.uid &&
+                    request.resource.data.userId == request.auth.uid &&
+                    request.resource.data.id == budgetId &&
+                    isValidBudget(request.resource.data) &&
+                    request.resource.data.diff(resource.data).affectedKeys().hasOnly(['limit']);
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+  }
+}

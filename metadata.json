@@ -1,0 +1,8 @@
+{
+  "name": "Remix: Remix: Remix: MyFinn",
+  "description": "Aplikasi pengelola keuangan pribadi yang cerdas untuk mencatat transaksi, mengontrol anggaran, dan memantau laporan keuangan secara aman.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
